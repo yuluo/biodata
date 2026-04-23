@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --prefix src run query *)",
+      "Bash(npm --prefix src run build-parquet *)",
+      "Bash(npm --prefix src run build-parquet)",
+      "Bash(npm --prefix src install)",
+      "Bash(bash src/scripts/install_node.sh)",
+      "Bash(mkdir -p query-result)",
+      "Bash(node src/scripts/query.js *)",
+      "Bash(git fetch *)",
+      "Bash(npm view *)",
+      "mcp__notion__notion-search",
+      "mcp__notion__notion-fetch"
+    ]
+  }
+}
