@@ -24,19 +24,20 @@ if ! git show-ref --verify --quiet refs/heads/release; then
 fi
 
 STAGE="$(mktemp -d -t biodata-shipping)"
-trap 'git worktree remove --force "$STAGE" >/dev/null 2>&1 || rm -rf "$STAGE"' EXIT
+trap 'rm -rf "$STAGE"' EXIT
+CLONE="$STAGE/biodata"
 
-git worktree add --quiet "$STAGE" release
+git clone --quiet --branch release . "$CLONE"
 
-git -C "$STAGE" remote set-url origin \
+git -C "$CLONE" remote set-url origin \
   "https://x-access-token:${PAT}@github.com/yuluo/biodata.git"
 
-SHA="$(git -C "$STAGE" rev-parse --short HEAD)"
+SHA="$(git -C "$CLONE" rev-parse --short HEAD)"
 OUT="$REPO_ROOT/biodata-${SHA}.zip"
 rm -f "$OUT"
 
 (
-  cd "$STAGE"
+  cd "$CLONE"
   zip -rq "$OUT" . \
     -x '.git/hooks/*' \
     -x 'data/*' \
