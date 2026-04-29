@@ -9,10 +9,7 @@
       "Bash(mkdir -p query-result)",
       "Bash(node src/scripts/query.js *)",
       "Bash(git fetch *)",
-      "Bash(git rev-parse *)",
-      "Bash(git log *)",
-      "Bash(git reset --hard origin/release)",
-      "Bash(shasum src/package.json)",
+      "Bash(bash src/scripts/update.sh)",
       "Bash(npm view *)",
       "mcp__notion__notion-search",
       "mcp__notion__notion-fetch"
