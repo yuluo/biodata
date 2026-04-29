@@ -34,13 +34,26 @@ install Node 20+ from https://nodejs.org/ and re-run `/setup`.
 
 ## Phase 2 — npm dependencies
 
+Check whether deps are already installed, and only install if missing.
+Run each command as a *discrete* Bash call — don't combine them into a
+compound `&&`/`||` expression, because the permission allowlist matches
+single commands, not shell compounds.
+
 ```bash
-[ -d src/node_modules ] && echo "deps present" || npm --prefix src install
+test -d src/node_modules
 ```
 
-Only run `npm install` if `src/node_modules/` is missing. Don't run on
-every setup. The `--prefix src` flag points npm at `src/package.json`
-without requiring you to `cd` (so subsequent shell redirects can still
+- Exit 0 = deps present. Tell the user *"Dependencies present, skipping
+  npm install."* and continue.
+- Non-zero = need to install. Tell the user *"Installing
+  dependencies…"* then run:
+
+```bash
+npm --prefix src install
+```
+
+The `--prefix src` flag points npm at `src/package.json` without
+requiring you to `cd` (so subsequent shell redirects can still
 reference root-relative paths like `query-result/`).
 
 ## Phase 3 — Import CSVs into Parquet
@@ -49,26 +62,42 @@ Verify CSVs are present, then import them. `build_parquet.js` reads the
 glob `data/variant_mock_*.csv` by default and writes
 `data_parquet/CHR=*/*.parquet` partitioned by chromosome.
 
+Count the CSVs the user has dropped in:
+
 ```bash
-CSV_COUNT=$(ls data/variant_mock_*.csv 2>/dev/null | wc -l | tr -d ' ')
-echo "Found $CSV_COUNT CSVs in data/"
+ls data/variant_mock_*.csv 2>/dev/null | wc -l
 ```
 
-- If `CSV_COUNT == 0`, stop. Tell the user: *"No CSVs found under
+- If the count is 0, stop. Tell the user: *"No CSVs found under
   `data/`. Drop your `variant_mock_*.csv` files there and re-run
   `/setup`."*
-- If `data_parquet/` is already populated, skip. Tell the user:
-  *"Parquet dataset already built (N partitions), skipping import."*
-- Otherwise, run the import. Stream stdout so the user sees progress:
+
+Then check whether the parquet dataset already exists. Two discrete
+calls — first whether the directory exists, then whether it's
+non-empty:
 
 ```bash
-[ -d data_parquet ] && [ -n "$(ls data_parquet 2>/dev/null)" ] \
-  && echo "parquet present" \
-  || npm --prefix src run build-parquet
+test -d data_parquet
 ```
 
-`build_parquet.js` refuses to overwrite a non-empty `data_parquet/`, so
-the guard is also a safety net.
+- Non-zero exit = directory missing, proceed to build.
+- Exit 0 = directory exists; check if it has content:
+
+```bash
+ls data_parquet
+```
+
+- Non-empty output = parquet already built. Tell the user *"Parquet
+  dataset already built (N partitions), skipping import."* and skip
+  the build.
+- Empty output (or `test -d` failed earlier) = run the import:
+
+```bash
+npm --prefix src run build-parquet
+```
+
+`build_parquet.js` refuses to overwrite a non-empty `data_parquet/`,
+so the guard above is also a safety net.
 
 The script prints a `[progress] MMmSSs  N files  XX.X MB` line every
 30 seconds during the import — stream stdout to the user so they see the
