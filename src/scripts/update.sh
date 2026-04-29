@@ -4,8 +4,8 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-if [ ! -d .git ]; then
-  echo "ERROR: this folder is missing its .git/ directory." >&2
+if [ ! -e .git ]; then
+  echo "ERROR: this folder is not a git checkout (no .git/ here)." >&2
   echo "Please unzip a fresh copy of biodata and try again." >&2
   exit 1
 fi
