@@ -5,3 +5,4 @@ query-result/
 *.log
 .DS_Store
 .claude/settings.local.json
+.shipping-pat
