@@ -4,8 +4,8 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  echo "ERROR: this folder is not a git checkout." >&2
+if [ ! -e .git ]; then
+  echo "ERROR: this folder is not a git checkout (no .git/ here)." >&2
   echo "Please unzip a fresh copy of biodata and try again." >&2
   exit 1
 fi
