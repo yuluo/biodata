@@ -1,6 +1,6 @@
 {
   "name": "biodata",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Mock variant annotation generator and DuckDB-based query layer",
   "engines": {
